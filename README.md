@@ -32,33 +32,48 @@ penny-stock-extension/
   <script src="popup.js"></script>
 </body>
 </html>
-const MARKETSTACK_KEY = "YOUR_API_KEY";
-const NEWS_KEY = "YOUR_API_KEY";
-
+const API_URL = "http://127.0.0.1:8000/scan"; // update if you deploy the backend elsewhere
+ 
 document.getElementById("scan").addEventListener("click", scanStocks);
-
+ 
 async function scanStocks() {
   const list = document.getElementById("results");
   list.innerHTML = "Scanning...";
 
-  const stocks = await fetch(
-    `http://api.marketstack.com/v1/eod?access_key=${MARKETSTACK_KEY}&limit=50`
-  ).then(r => r.json());
-
-  const pennyStocks = stocks.data.filter(s => s.close < 5);
-
-  const scored = await Promise.all(
-    pennyStocks.map(async stock => {
-      const sentiment = await getNewsScore(stock.symbol);
-      const trendScore = stock.close - stock.open;
-
-      return {
-        symbol: stock.symbol,
-        price: stock.close,
-        score: trendScore + sentiment
-      };
-    })
-  );
+try {
+    const res = await fetch(API_URL);
+ 
+    // FIX #10: check status before trying to parse JSON
+    if (!res.ok) {
+      throw new Error(`Server returned ${res.status}`);
+    }
+ 
+    const data = await res.json();
+    renderResults(data.stocks || []);
+  } catch (err) {
+    list.innerHTML = "";
+    const li = document.createElement("li");
+    li.textContent = `Error: ${err.message}. Is the backend running?`;
+    list.appendChild(li);
+  }
+}
+ 
+function renderResults(stocks) {
+  const list = document.getElementById("results");
+  list.innerHTML = "";
+ 
+  if (stocks.length === 0) {
+    list.innerHTML = "<li>No results</li>";
+    return;
+  }
+ 
+  stocks.slice(0, 10).forEach(s => {
+    const li = document.createElement("li");
+    li.textContent = `${s.symbol} (AI score: ${s.score.toFixed(2)})`;
+    list.appendChild(li);
+  });
+}
+ 
 
   scored.sort((a, b) => b.score - a.score);
 
