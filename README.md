@@ -15,14 +15,13 @@ penny-stock-extension/
   },
   "permissions": ["storage"],
   "host_permissions": [
-    "https://api.marketstack.com/*",
-    "https://newsapi.org/*"
+    "http://127.0.0.1:8000/*"
   ]
 }
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Penny Stock Analyzer</title>
+  <title> Micah's Penny Stock Analyzer</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -161,8 +160,8 @@ for ticker in penny_tickers:
     vol = volatility_score(df)
 
     fake_news = [
-        f"{ticker} announces growth opportunity",
-        f"{ticker} expands operations"
+        F"{ticker} announces growth opportunity",
+        F"{ticker} expands operations"
     ]
 
     s = sentiment_score(fake_news)
